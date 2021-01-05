@@ -24,17 +24,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Run tests
-        run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
-
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 15
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Test
+      run: ./gradlew test
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
@@ -47,8 +47,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 15
+            
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew  
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+        run: ./gradlew bootBuildImage --imageName=$IMAGE_NAME
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
