@@ -1,7 +1,11 @@
-#FROM gradle:6.7-jre15
-FROM openjdk:15-alpine
+FROM openjdk:15-alpine as build
+COPY . .
+CMD ./gradlew build
+
+FROM openjdk:15-alpine as runtime
+WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+COPY --from=build build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","app.jar"]
