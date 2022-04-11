@@ -1,22 +1,17 @@
 name: Docker
 on:
   push:
-    # Publish `master` as Docker `latest` image.
     branches:
       - main
-    # Publish `v1.2.3` tags as releases.
     tags:
       - v*
-  # Run tests for any PRs.
   pull_request:
     branches: [ main ]
 env:
   IMAGE_NAME: springboilerplate
 jobs:
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
@@ -31,12 +26,9 @@ jobs:
     - name: Test
       run: ./gradlew test
     - run: bash <(curl -s https://codecov.io/bash)
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
   push:
-    # Ensure test job passes before pushing image.
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
@@ -72,7 +64,7 @@ jobs:
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$VERSION" == "main" ] && VERSION=latest
           docker tag $IMAGE_NAME $IMAGE_ID_GITHUB:$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID_HUB:$VERSION
           docker push $IMAGE_ID_GITHUB:$VERSION
