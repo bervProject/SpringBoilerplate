@@ -1,8 +1,8 @@
-FROM openjdk:15-alpine as build
+FROM openjdk:17-alpine as build
 COPY . .
 CMD ./gradlew build
 
-FROM openjdk:15-alpine as runtime
+FROM openjdk:17-alpine as runtime
 WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
