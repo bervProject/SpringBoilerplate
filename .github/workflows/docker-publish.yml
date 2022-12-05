@@ -25,7 +25,9 @@ jobs:
       run: ./gradlew build
     - name: Test
       run: ./gradlew test
-    - run: bash <(curl -s https://codecov.io/bash)
+    - uses: codecov/codecov-action@v3
+    - name: Build image
+      run: ./gradlew bootBuildImage --imageName=$IMAGE_NAME
   push:
     needs: test
     runs-on: ubuntu-22.04
